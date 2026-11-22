@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="mr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel | श्री कालिकामाता नागरी सहकारी पतसंस्था</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="top"><div class="container"><span>संस्थेचे व्यवस्थापन पॅनेल</span><a href="index.html">← वेबसाइटवर परत जा</a></div></div>
+<header><div class="container navwrap"><a class="brand" href="index.html"><img class="logo" src="logo.png" alt="संस्थेचा लोगो"><span><strong>श्री कालिकामाता नागरी सहकारी<br>पतसंस्था मर्यादित, कालवार</strong><small>Admin Panel</small></span></a></div></header>
+<section class="pagehead"><div class="container"><h1>Admin Panel</h1><p>सूचना, सेवा आणि शाखांची माहिती व्यवस्थापित करा</p></div></section>
+<div class="container admin-wrap">
+<aside class="admin-side">
+<button class="active" data-tab="notices">📢 सूचना व्यवस्थापन</button>
+<button data-tab="services">▤ सेवा व्यवस्थापन</button>
+<button data-tab="branches">⌖ शाखा व्यवस्थापन</button>
+<button data-tab="backup">⇧ बॅकअप / डेटा</button>
+</aside>
+<div class="admin-main">
+<div class="warning"><b>महत्त्वाची मर्यादा:</b> हे सध्या ब्राउझरमधील स्थानिक डेमो पॅनेल आहे. येथे केलेले बदल फक्त याच ब्राउझर/डिव्हाइसवर दिसतील. वेबसाइटवरील सर्व अभ्यागतांना बदल दिसण्यासाठी सुरक्षित सर्व्हर आणि डेटाबेस जोडणे आवश्यक आहे. हे पॅनेल सार्वजनिक होस्टिंगवर सुरक्षित लॉगिनशिवाय प्रकाशित करू नका.</div>
+<div id="status" class="status" role="status">तुम्ही व्यवस्थापन पॅनेलमध्ये आहात.</div>
+<section class="admin-panel active" id="panel-notices"><h2>सूचना व्यवस्थापन</h2>
+<form class="admin-form" id="notice-form"><label>सूचनेचे शीर्षक<input id="notice-title" required placeholder="उदा. कार्यालयीन वेळेबाबत सूचना"></label><label>सूचना<textarea id="notice-body" required placeholder="सूचनेचा मजकूर"></textarea></label><div class="admin-actions"><button class="btn">सूचना जोडा</button></div></form><h3>जोडलेल्या सूचना</h3><div id="notice-list"></div></section>
+<section class="admin-panel" id="panel-services"><h2>सेवा व्यवस्थापन</h2>
+<form class="admin-form" id="service-form"><label>सेवेचे नाव<input id="service-title" required placeholder="उदा. बचत ठेव योजना"></label><label>सेवेचे वर्णन<textarea id="service-body" required placeholder="सेवेचे तपशील"></textarea></label><div class="admin-actions"><button class="btn">सेवा जोडा</button></div></form><h3>जोडलेल्या सेवा</h3><div id="service-list"></div></section>
+<section class="admin-panel" id="panel-branches"><h2>शाखा व्यवस्थापन</h2>
+<form class="admin-form" id="branch-form"><label>शाखेचे नाव<input id="branch-title" required placeholder="उदा. मुख्य कार्यालय"></label><label>पत्ता<textarea id="branch-address" required placeholder="पूर्ण पत्ता"></textarea></label><label>संपर्क क्रमांक<input id="branch-phone" placeholder="मोबाईल / फोन"></label><div class="admin-actions"><button class="btn">शाखा जोडा</button></div></form><h3>जोडलेल्या शाखा</h3><div id="branch-list"></div></section>
+<section class="admin-panel" id="panel-backup"><h2>बॅकअप / डेटा</h2><p>तुमच्या स्थानिक ब्राउझरमधील व्यवस्थापन डेटा JSON फाईल म्हणून डाउनलोड करा किंवा आधीचा बॅकअप आयात करा.</p><div class="admin-actions"><button class="btn" id="export-btn" type="button">डेटा डाउनलोड करा</button><label class="btn secondary">बॅकअप आयात करा<input id="import-file" type="file" accept="application/json" hidden></label><button class="btn secondary" id="reset-btn" type="button">डेमो डेटा रीसेट</button></div></section>
+</div></div>
+<script src="admin.js"></script></body></html>
