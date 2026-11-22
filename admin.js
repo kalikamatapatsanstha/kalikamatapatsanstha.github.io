@@ -85,32 +85,33 @@
   });
 
   function render(k) {
-    const list = document.getElementById(
-      k.slice(0, -1) + "-list"
-    );
-    const items = get(k);
+  const listIds = {
+    notices: "notice-list",
+    services: "service-list",
+    branches: "branch-list"
+  };
 
-    list.innerHTML = items.length
-      ? items.map((x, i) => `
-        <div class="item-row">
-          <div>
-            <b>${esc(x.title)}</b>
-            <p>${esc(x.body || x.address || "")}</p>
-            ${x.phone ? `<small>${esc(x.phone)}</small>` : ""}
-          </div>
-          <div class="admin-actions">
-            <button type="button" data-edit="${k}" data-index="${i}">
-              बदला
-            </button>
-            <button type="button" data-delete="${k}" data-index="${i}">
-              काढून टाका
-            </button>
-          </div>
+  const list = document.getElementById(listIds[k]);
+  if (!list) return;
+
+  const items = get(k);
+
+  list.innerHTML = items.length
+    ? items.map((x, i) => `
+      <div class="item-row">
+        <div>
+          <b>${esc(x.title)}</b>
+          <p>${esc(x.body || x.address || "")}</p>
+          ${x.phone ? `<small>${esc(x.phone)}</small>` : ""}
         </div>
-      `).join("")
-      : '<p class="muted">अद्याप कोणतीही नोंद नाही.</p>';
-  }
-
+        <div class="admin-actions">
+          <button data-edit="${k}" data-index="${i}">बदला</button>
+          <button data-delete="${k}" data-index="${i}">काढून टाका</button>
+        </div>
+      </div>
+    `).join("")
+    : '<p class="muted">अद्याप कोणतीही नोंद नाही.</p>';
+}
   function refresh() {
     keys.forEach(render);
   }
