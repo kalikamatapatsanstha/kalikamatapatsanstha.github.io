@@ -4,30 +4,12 @@
   const defaults = {
     notices: [],
     services: [
-      {
-        title: "बचत ठेव योजना",
-        body: "नियमित बचतीसाठी बचत ठेव सुविधा. खाते उघडण्याच्या अटी कार्यालयात जाणून घ्या."
-      },
-      {
-        title: "मुदत ठेव योजना",
-        body: "निश्चित कालावधीसाठी रक्कम ठेवण्याची सुविधा. लागू कालावधी व व्याजदर संस्थेकडून तपासा."
-      },
-      {
-        title: "आवर्ती ठेव योजना",
-        body: "ठराविक अंतराने नियमित रक्कम जमा करून बचत करण्याची सुविधा."
-      },
-      {
-        title: "दैनिक ठेव योजना",
-        body: "योजनेच्या नियमानुसार दररोज किंवा ठरलेल्या वेळापत्रकानुसार बचत जमा करण्याची सुविधा."
-      },
-      {
-        title: "कर्ज सुविधा",
-        body: "सभासदांची पात्रता, आवश्यक कागदपत्रे आणि संस्थेच्या मंजुरीनुसार कर्ज सुविधा."
-      },
-      {
-        title: "दैनिक संकलन सेवा",
-        body: "संस्थेच्या अधिकृत प्रतिनिधीमार्फत सभासदांकडून दैनिक जमा रक्कम संकलित करण्याची सेवा."
-      }
+      { title: "बचत ठेव योजना", body: "नियमित बचतीसाठी बचत ठेव सुविधा. खाते उघडण्याच्या अटी कार्यालयात जाणून घ्या." },
+      { title: "मुदत ठेव योजना", body: "निश्चित कालावधीसाठी रक्कम ठेवण्याची सुविधा. लागू कालावधी व व्याजदर संस्थेकडून तपासा." },
+      { title: "आवर्ती ठेव योजना", body: "ठराविक अंतराने नियमित रक्कम जमा करून बचत करण्याची सुविधा." },
+      { title: "दैनिक ठेव योजना", body: "योजनेच्या नियमानुसार दररोज किंवा ठरलेल्या वेळापत्रकानुसार बचत जमा करण्याची सुविधा." },
+      { title: "कर्ज सुविधा", body: "सभासदांची पात्रता, आवश्यक कागदपत्रे आणि संस्थेच्या मंजुरीनुसार कर्ज सुविधा." },
+      { title: "दैनिक संकलन सेवा", body: "संस्थेच्या अधिकृत प्रतिनिधीमार्फत सभासदांकडून दैनिक जमा रक्कम संकलित करण्याची सेवा." }
     ],
     branches: [
       {
@@ -40,172 +22,221 @@
 
   const get = k => {
     try {
-      return JSON.parse(
-        localStorage.getItem("patsanstha_" + k) || "[]"
-      );
+      const value = JSON.parse(localStorage.getItem("patsanstha_" + k));
+      return Array.isArray(value) ? value : [];
     } catch (e) {
       return [];
     }
   };
 
-  const set = (k, v) =>
-    localStorage.setItem("patsanstha_" + k, JSON.stringify(v));
-
-  // प्रथमच उघडताना आधीच्या वेबसाइटवरील माहिती भरा.
-  keys.forEach(k => {
-    if (localStorage.getItem("patsanstha_" + k) === null) {
-      set(k, defaults[k]);
-    }
-  });
+  const set = (k, value) =>
+    localStorage.setItem("patsanstha_" + k, JSON.stringify(value));
 
   const status = document.getElementById("status");
-  const msg = t => status.textContent = t;
+  const msg = t => {
+    if (status) status.textContent = t;
+  };
 
-  const esc = s =>
-    String(s ?? "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[c]));
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  }[c]));
 
-  document.querySelectorAll("[data-tab]").forEach(b => {
-    b.addEventListener("click", () => {
-      document.querySelectorAll("[data-tab]").forEach(x =>
-        x.classList.remove("active")
-      );
-      document.querySelectorAll(".admin-panel").forEach(x =>
-        x.classList.remove("active")
-      );
-      b.classList.add("active");
-      document.getElementById("panel-" + b.dataset.tab)
-        .classList.add("active");
-    });
-  });
+  // प्रथमच मूळ सेवा आणि मुख्य कार्यालय दाखवा
+  const initialized = "patsanstha_admin_initialized_v2";
 
-  function render(k) {
+  if (!localStorage.getItem(initialized)) {
+    const allEmpty = keys.every(k => get(k).length === 0);
+
+    if (allEmpty) {
+      keys.forEach(k => set(k, defaults[k]));
+    }
+
+    localStorage.setItem(initialized, "yes");
+  }
+
   const listIds = {
     notices: "notice-list",
     services: "service-list",
     branches: "branch-list"
   };
 
-  const list = document.getElementById(listIds[k]);
-  if (!list) return;
+  const forms = {
+    notices: {
+      form: document.getElementById("notice-form"),
+      fields: ["notice-title", "notice-body"],
+      names: ["title", "body"]
+    },
+    services: {
+      form: document.getElementById("service-form"),
+      fields: ["service-title", "service-body"],
+      names: ["title", "body"]
+    },
+    branches: {
+      form: document.getElementById("branch-form"),
+      fields: ["branch-title", "branch-address", "branch-phone"],
+      names: ["title", "address", "phone"]
+    }
+  };
 
-  const items = get(k);
+  const editing = {
+    notices: null,
+    services: null,
+    branches: null
+  };
 
-  list.innerHTML = items.length
-    ? items.map((x, i) => `
-      <div class="item-row">
-        <div>
-          <b>${esc(x.title)}</b>
-          <p>${esc(x.body || x.address || "")}</p>
-          ${x.phone ? `<small>${esc(x.phone)}</small>` : ""}
+  function render(k) {
+    const list = document.getElementById(listIds[k]);
+    if (!list) return;
+
+    const items = get(k);
+
+    list.innerHTML = items.length
+      ? items.map((x, i) => `
+        <div class="item-row">
+          <div>
+            <b>${esc(x.title)}</b>
+            <p>${esc(x.body || x.address || "")}</p>
+            ${x.phone ? `<small>${esc(x.phone)}</small>` : ""}
+          </div>
+          <div class="admin-actions">
+            <button type="button" data-edit="${k}" data-index="${i}">बदला</button>
+            <button type="button" data-delete="${k}" data-index="${i}">काढून टाका</button>
+          </div>
         </div>
-        <div class="admin-actions">
-          <button data-edit="${k}" data-index="${i}">बदला</button>
-          <button data-delete="${k}" data-index="${i}">काढून टाका</button>
-        </div>
-      </div>
-    `).join("")
-    : '<p class="muted">अद्याप कोणतीही नोंद नाही.</p>';
-}
+      `).join("")
+      : '<p class="muted">अद्याप कोणतीही नोंद नाही.</p>';
+  }
+
   function refresh() {
     keys.forEach(render);
   }
 
-  document.getElementById("notice-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const a = get("notices");
-    a.unshift({
-      title: document.getElementById("notice-title").value.trim(),
-      body: document.getElementById("notice-body").value.trim()
+  function finishEdit(k) {
+    const config = forms[k];
+    editing[k] = null;
+    config.form.reset();
+
+    const button = config.form.querySelector("button");
+    if (button) button.textContent = k === "notices"
+      ? "सूचना जोडा"
+      : k === "services" ? "सेवा जोडा" : "शाखा जोडा";
+
+    const cancel = config.form.querySelector(".cancel-edit");
+    if (cancel) cancel.remove();
+  }
+
+  function startEdit(k, index) {
+    const config = forms[k];
+    const item = get(k)[index];
+    if (!item) return;
+
+    editing[k] = index;
+
+    config.fields.forEach((id, i) => {
+      document.getElementById(id).value = item[config.names[i]] || "";
     });
-    set("notices", a);
-    e.target.reset();
-    refresh();
-    msg("सूचना स्थानिक ब्राउझरमध्ये जतन झाली.");
-  });
 
-  document.getElementById("service-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const a = get("services");
-    a.unshift({
-      title: document.getElementById("service-title").value.trim(),
-      body: document.getElementById("service-body").value.trim()
-    });
-    set("services", a);
-    e.target.reset();
-    refresh();
-    msg("सेवा स्थानिक ब्राउझरमध्ये जतन झाली.");
-  });
+    const button = config.form.querySelector("button");
+    if (button) button.textContent = "बदल जतन करा";
 
-  document.getElementById("branch-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const a = get("branches");
-    a.unshift({
-      title: document.getElementById("branch-title").value.trim(),
-      address: document.getElementById("branch-address").value.trim(),
-      phone: document.getElementById("branch-phone").value.trim()
-    });
-    set("branches", a);
-    e.target.reset();
-    refresh();
-    msg("शाखेची माहिती स्थानिक ब्राउझरमध्ये जतन झाली.");
-  });
+    if (!config.form.querySelector(".cancel-edit")) {
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "btn secondary cancel-edit";
+      cancel.textContent = "रद्द करा";
+      cancel.addEventListener("click", () => finishEdit(k));
+      config.form.querySelector(".admin-actions").appendChild(cancel);
+    }
 
-  document.addEventListener("click", e => {
-    const edit = e.target.closest("[data-edit]");
-    const del = e.target.closest("[data-delete]");
+    config.form.scrollIntoView({ behavior: "smooth", block: "center" });
+    msg("माहिती बदला आणि 'बदल जतन करा' क्लिक करा.");
+  }
 
-    if (edit) {
-      const k = edit.dataset.edit;
-      const i = Number(edit.dataset.index);
-      const a = get(k);
-      const x = a[i];
+  // सूचना, सेवा आणि शाखा Add / Update
+  keys.forEach(k => {
+    const config = forms[k];
 
-      const title = prompt("नाव बदला:", x.title);
-      if (title === null) return;
+    config.form.addEventListener("submit", e => {
+      e.preventDefault();
 
-      const field = k === "branches" ? "address" : "body";
-      const value = prompt(
-        k === "branches" ? "पत्ता बदला:" : "वर्णन बदला:",
-        x[field] || ""
-      );
-      if (value === null) return;
+      const item = {};
+      config.fields.forEach((id, i) => {
+        item[config.names[i]] =
+          document.getElementById(id).value.trim();
+      });
 
-      x.title = title.trim();
-      x[field] = value.trim();
+      if (!item.title) return;
 
-      if (k === "branches") {
-        const phone = prompt("मोबाईल क्रमांक बदला:", x.phone || "");
-        if (phone === null) return;
-        x.phone = phone.trim();
+      const items = get(k);
+
+      if (editing[k] !== null) {
+        items[editing[k]] = item;
+        set(k, items);
+        finishEdit(k);
+        msg("माहिती यशस्वीपणे अपडेट झाली.");
+      } else {
+        items.unshift(item);
+        set(k, items);
+        config.form.reset();
+        msg("नवीन माहिती जोडली गेली.");
       }
 
-      a[i] = x;
-      set(k, a);
       refresh();
-      msg("बदल स्थानिक ब्राउझरमध्ये जतन झाले.");
+    });
+  });
+
+  // Update आणि Delete बटणे
+  document.addEventListener("click", e => {
+    const editButton = e.target.closest("[data-edit]");
+
+    if (editButton) {
+      startEdit(
+        editButton.dataset.edit,
+        Number(editButton.dataset.index)
+      );
       return;
     }
 
-    if (del) {
-      const k = del.dataset.delete;
-      const a = get(k);
-      const i = Number(del.dataset.index);
+    const deleteButton = e.target.closest("[data-delete]");
+    if (!deleteButton) return;
 
-      if (confirm("ही नोंद काढून टाकायची आहे का?")) {
-        a.splice(i, 1);
-        set(k, a);
-        refresh();
-        msg("नोंद काढून टाकली.");
-      }
+    const k = deleteButton.dataset.delete;
+    const index = Number(deleteButton.dataset.index);
+
+    if (!confirm("ही नोंद कायमची काढून टाकायची आहे का?")) return;
+
+    const items = get(k);
+    items.splice(index, 1);
+    set(k, items);
+
+    if (editing[k] === index) {
+      finishEdit(k);
     }
+
+    refresh();
+    msg("नोंद काढून टाकली.");
   });
 
+  // Tabs
+  document.querySelectorAll("[data-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-tab]").forEach(x =>
+        x.classList.remove("active")
+      );
+
+      document.querySelectorAll(".admin-panel").forEach(x =>
+        x.classList.remove("active")
+      );
+
+      button.classList.add("active");
+      document.getElementById(
+        "panel-" + button.dataset.tab
+      ).classList.add("active");
+    });
+  });
+
+  // Backup Download
   document.getElementById("export-btn").addEventListener("click", () => {
     const data = {};
     keys.forEach(k => data[k] = get(k));
@@ -216,36 +247,44 @@
     );
 
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    a.href = url;
     a.download = "patsanstha-backup.json";
     a.click();
-    URL.revokeObjectURL(a.href);
+    URL.revokeObjectURL(url);
+
     msg("बॅकअप डाउनलोड सुरू झाला.");
   });
 
+  // Backup Import
   document.getElementById("import-file").addEventListener("change", async e => {
-    const f = e.target.files[0];
-    if (!f) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
     try {
-      const d = JSON.parse(await f.text());
+      const data = JSON.parse(await file.text());
+
       keys.forEach(k => {
-        if (Array.isArray(d[k])) set(k, d[k]);
+        if (Array.isArray(data[k])) set(k, data[k]);
       });
+
       refresh();
       msg("बॅकअप आयात केला.");
-    } catch (err) {
-      msg("योग्य JSON बॅकअप निवडा.");
+    } catch (error) {
+      msg("योग्य JSON बॅकअप फाईल निवडा.");
     }
+
     e.target.value = "";
   });
 
+  // Reset to original demo data
   document.getElementById("reset-btn").addEventListener("click", () => {
-    if (confirm("स्थानिक सूचना, सेवा आणि शाखांची नोंद रिकामी करायची?")) {
-      keys.forEach(k => set(k, []));
-      refresh();
-      msg("स्थानिक व्यवस्थापन डेटा रिकामा केला.");
-    }
+    if (!confirm("मूळ सहा सेवा आणि मुख्य कार्यालयाची माहिती पुन्हा आणायची?")) return;
+
+    keys.forEach(k => set(k, defaults[k]));
+    keys.forEach(finishEdit);
+    refresh();
+    msg("मूळ माहिती पुन्हा आणली.");
   });
 
   refresh();
